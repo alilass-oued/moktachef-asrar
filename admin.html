@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم | رفع المحتوى</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background: #1a1a2e; color: white; display: flex; justify-content: center; padding: 20px; margin: 0; }
+        .box { background: #16213e; padding: 30px; border-radius: 20px; width: 100%; max-width: 450px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+        .hidden { display: none; }
+        input, textarea { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: none; background: #0f3460; color: white; box-sizing: border-box; }
+        .btn { background: #e94560; color: white; padding: 15px; border: none; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        .upload-zone { border: 2px dashed #444; padding: 20px; cursor: pointer; margin-bottom: 10px; border-radius: 15px; }
+        .status { color: #00d2ff; font-size: 0.9rem; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="login" class="box">
+        <h2>الرمز السري</h2>
+        <input type="password" id="sk" placeholder="أدخل 1234">
+        <button class="btn" onclick="access()">دخول</button>
+    </div>
+
+    <div id="main-ui" class="box hidden">
+        <h3>إضافة محتوى جديد</h3>
+        
+        <div class="upload-zone" onclick="document.getElementById('f').click()">
+            <i class="fas fa-file-upload fa-2x"></i>
+            <p>رفع ملف (اختياري)</p>
+        </div>
+        <input type="file" id="f" class="hidden">
+        <div id="info" class="status"></div>
+
+        <input type="text" id="t" placeholder="عنوان القصة (ضروري)">
+        <textarea id="d" rows="6" placeholder="اكتب القصة هنا (ضروري إذا لم ترفع ملفاً)"></textarea>
+        
+        <button class="btn" onclick="save()">نشر الآن</button>
+    </div>
+
+    <script>
+        let currentFile = "", currentName = "نص فقط", currentType = "text";
+
+        function access() {
+            if(document.getElementById('sk').value === "6550/18042012") {
+                document.getElementById('login').classList.add('hidden');
+                document.getElementById('main-ui').classList.remove('hidden');
+            } else { alert("خطأ!"); }
+        }
+
+        document.getElementById('f').onchange = function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            currentName = file.name;
+            const ext = currentName.split('.').pop().toLowerCase();
+            
+            if(ext === 'pdf') currentType = 'pdf';
+            else if(['doc', 'docx'].includes(ext)) currentType = 'docx';
+            else if(['jpg', 'jpeg', 'png'].includes(ext)) currentType = 'image';
+            else currentType = 'text';
+
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                currentFile = ev.target.result;
+                document.getElementById('info').innerText = "✅ تم اختيار: " + currentName;
+                document.getElementById('t').value = currentName.split('.')[0];
+            };
+            reader.readAsDataURL(file);
+        };
+
+        function save() {
+            const title = document.getElementById('t').value;
+            const desc = document.getElementById('d').value;
+
+            // التعديل الجديد: يسمح بالنشر إذا كان هناك (عنوان + نص) OR (عنوان + ملف)
+            if(!title || (!desc && !currentFile)) {
+                alert("الرجاء كتابة العنوان والقصة أولاً!");
+                return;
+            }
+
+            const newItem = {
+                title, 
+                desc: desc || "ملف مرفوع", 
+                file: currentFile || "#", 
+                name: currentName, 
+                type: currentType,
+                date: new Date().toLocaleDateString('ar-TN')
+            };
+
+            let data = JSON.parse(localStorage.getItem('myAdvancedLib')) || [];
+            data.unshift(newItem);
+            localStorage.setItem('myAdvancedLib', JSON.stringify(data));
+
+            alert("تم النشر بنجاح!");
+            window.location.href = "index.html";
+        }
+    </script>
+</body>
+</html>

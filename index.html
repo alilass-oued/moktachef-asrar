@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مكتشف الأسرار</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+:root { --bg:#f4f7f6; --text:#2c3e50; --primary:#8e44ad; --paper:#f9f4e8; --gold:#d4af37; }
+body{ font-family:'Tajawal',sans-serif; background-color:var(--bg); margin:0; color:var(--text); padding-bottom:50px; }
+.header{ background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; padding:30px 15px; text-align:center; box-shadow:0 5px 15px rgba(0,0,0,0.2); position: sticky; top:0; z-index:100; }
+.search-box{ width:90%; max-width:400px; padding:12px; border-radius:25px; border:none; margin-top:15px; background: rgba(255,255,255,0.9); outline:none; font-size:1rem; }
+.grid-container{ display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:20px; max-width:1000px; margin:30px auto; padding:15px; }
+.book-cover{ background:white; border-radius:12px; padding:15px; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.05); cursor:pointer; transition:0.3s; position:relative; overflow:hidden; height:180px; display:flex; flex-direction:column; justify-content:space-between; align-items:center; border:1px solid #eee; }
+.book-cover:hover{ transform:translateY(-5px) scale(1.03); box-shadow:0 10px 20px rgba(0,0,0,0.1); border-color:var(--primary); }
+.book-cover i{ font-size:2.5rem; color:var(--primary); margin-top:15px; }
+.book-cover h3{ font-size:1.1rem; margin:10px 0; color:var(--text); overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; flex-grow:1; }
+.type-badge{ position:absolute; top:-10px; right:-10px; background:var(--gold); color:white; padding:15px 10px 5px; font-size:0.7rem; font-weight:bold; transform:rotate(45deg); width:60px; text-align:center; }
+.modal{ display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; overflow:auto; background-color: rgba(0,0,0,0.8); backdrop-filter:blur(5px); }
+.modal-content{ background-color:var(--paper); font-family:'Amiri',serif; margin:5vh auto; padding:40px; border-radius:5px; width:90%; max-width:700px; box-shadow:0 10px 30px rgba(0,0,0,0.5); position:relative; border-right:15px solid #dcd3bc; line-height:1.8; animation:zoomIn 0.3s; }
+@keyframes zoomIn{ from {transform:scale(0.7); opacity:0;} to {transform:scale(1); opacity:1;} }
+.close-btn{ position:absolute; top:10px; left:15px; color:var(--text); font-size:2rem; cursor:pointer; z-index:10; }
+.close-btn:hover{ color:#e74c3c; }
+.modal-content h2{ text-align:center; font-size:2rem; color:#8e44ad; border-bottom:2px double var(--gold); padding-bottom:10px; margin-bottom:25px; }
+.modal-content p{ font-size:1.2rem; text-align:justify; white-space:pre-wrap; color:#333; }
+.download-link{ display:inline-block; margin-top:20px; color:var(--gold); text-decoration:none; font-weight:bold; border:1px solid var(--gold); padding:5px 15px; border-radius:4px; }
+.download-link:hover{ background:var(--gold); color:white; }
+.meta-info{ font-size:0.8rem; color:#7f8c8d; margin-top:30px; border-top:1px solid #eee; padding-top:10px; display:flex; justify-content:space-between; }
+
+/* لوحة الإدارة */
+.admin-panel{ position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:2000; overflow-y:auto; padding:20px; }
+.admin-card{ background:var(--paper); padding:30px; border-radius:15px; width:100%; max-width:600px; color:#333; position:relative; border:3px solid var(--gold); }
+.close-icon{ position:absolute; top:10px; left:15px; font-size:22px; cursor:pointer; }
+.admin-book{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:8px 12px; background:#f0f0f0; border-radius:8px; }
+.admin-book button{ background:crimson; color:white; border:none; padding:5px 10px; border-radius:6px; cursor:pointer; }
+.admin-book button:hover{ background:darkred; }
+.add-story-form{ background:#fff; padding:15px; border-radius:12px; margin-bottom:20px; }
+.add-story-form textarea, .add-story-form input, .add-story-form select{ width:100%; margin:8px 0; padding:10px; border-radius:8px; border:1px solid #ccc; font-size:1rem; }
+.add-story-form button{ background:var(--primary); color:white; border:none; padding:10px 15px; border-radius:8px; cursor:pointer; margin-top:10px; }
+.add-story-form button:hover{ background:darkmagenta; }
+
+/* المفتاح السري */
+.secret-vault-key{ position: fixed; bottom:30px; left:30px; z-index:999; cursor:pointer; display:block; }
+.keyhole-design{ width:55px; height:55px; background:var(--text); border:2px solid var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 15px var(--gold); transition:0.3s; }
+.keyhole-design i{ color:var(--gold); font-size:1.5rem; }
+.keyhole-design:hover{ transform:rotate(-15deg) scale(1.1); }
+.logo-container{ position: fixed; top:20px; right:20px; z-index:1000; display:flex; align-items:center; direction:rtl; background:rgba(0,0,0,0.7); padding:8px 15px; border-radius:30px; border:1px solid #ffd700; }
+.logo-icon{ font-size:30px; margin-left:10px; animation:shine 2s infinite alternate; }
+.logo-text{ color:#ffd700; font-weight:bold; font-size:16px; }
+@keyframes shine{ from { transform:scale(1); opacity:0.8; } to { transform:scale(1.1); opacity:1; } }
+</style>
+</head>
+<body>
+
+<div class="logo-container">
+    <div class="logo-icon">🗝️ 📖</div>
+    <div class="logo-text">مكتشف الأسرار</div>
+</div>
+
+<div class="header">
+    <h2><i class="fas fa-magic"></i>حكايات الأمس برؤية اليوم.. بين كل سطر وسطر، عالمٌ ينتظر من يفك أسراره</h2>
+    <input type="text" id="search" class="search-box" placeholder="ابحث في فهارس الكتب..." onkeyup="searchBooks()">
+</div>
+
+<div class="grid-container" id="book-shelf"></div>
+
+<div id="storyModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeStory()">&times;</span>
+        <div style="text-align:center; color: var(--gold)"><i class="fas fa-feather-alt fa-2x"></i></div>
+        <h2 id="modalTitle">العنوان</h2>
+        <p id="modalDesc">المحتوى</p>
+        <a id="modalDownload" href="#" class="download-link hidden" download><i class="fas fa-paperclip"></i> تحميل الملحق</a>
+        <div class="meta-info">
+            <span><i class="fas fa-pen-nib"></i> نُشر في: <span id="modalDate">التاريخ</span></span>
+            <span><i class="fas fa-bookmark"></i> <span id="modalType">النوع</span></span>
+        </div>
+    </div>
+</div>
+
+<!-- لوحة الإدارة -->
+<div class="admin-panel">
+    <div class="admin-card">
+        <span class="close-icon">&times;</span>
+        <h2>لوحة الإدارة</h2>
+
+        <div class="add-story-form">
+            <h3>إضافة قصة جديدة</h3>
+            <input type="text" id="storyTitle" placeholder="العنوان">
+            <textarea id="storyDesc" rows="6" placeholder="المحتوى"></textarea>
+            <select id="storyType">
+                <option value="">اختر النوع</option>
+                <option value="pdf">PDF</option>
+                <option value="docx">Word</option>
+                <option value="image">صورة</option>
+                <option value="other">ملف آخر</option>
+            </select>
+            <input type="file" id="storyFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.zip,.rar">
+            <p id="filePreview"></p>
+            <button onclick="addStory()">حفظ القصة</button>
+        </div>
+
+        <h3>القصص الحالية</h3>
+        <div id="adminBookList"></div>
+    </div>
+</div>
+
+<!-- مفتاح الوصول -->
+<div class="secret-vault-key">
+    <div class="keyhole-design"><i class="fas fa-key"></i></div>
+</div>
+
+<script>
+// البيانات
+function displayBooks(){
+    const shelf=document.getElementById('book-shelf');
+    const data=JSON.parse(localStorage.getItem('myAdvancedLib'))||[];
+    shelf.innerHTML='';
+    data.forEach((item,index)=>{
+        const cover=document.createElement('div');
+        cover.className='book-cover';
+        cover.onclick=()=>openStory(index);
+        let iconClass="fa-book";
+        if(item.type==='pdf') iconClass="fa-file-pdf";
+        else if(item.type==='docx' || item.type==='doc') iconClass="fa-file-word";
+        else if(item.type==='image') iconClass="fa-file-image";
+        else iconClass="fa-file";
+        cover.innerHTML=`<div class="type-badge">${item.type.toUpperCase()}</div><i class="fas ${iconClass}"></i><h3>${item.title}</h3>`;
+        shelf.appendChild(cover);
+    });
+    displayAdminBooks();
+}
+function openStory(index){
+    const data=JSON.parse(localStorage.getItem('myAdvancedLib'))||[];
+    const story=data[index];
+    const modal=document.getElementById('storyModal');
+    document.getElementById('modalTitle').innerText=story.title;
+    document.getElementById('modalDesc').innerText=story.desc;
+    document.getElementById('modalDate').innerText=story.date;
+    document.getElementById('modalType').innerText=story.type.toUpperCase();
+    const downloadBtn=document.getElementById('modalDownload');
+    if(story.file){
+        downloadBtn.href=story.file;
+        downloadBtn.download=story.name||story.title;
+        downloadBtn.style.display='inline-block';
+    } else downloadBtn.style.display='none';
+    modal.style.display="block";
+}
+function closeStory(){document.getElementById('storyModal').style.display="none";}
+window.onclick=function(event){ if(event.target==document.getElementById('storyModal')) closeStory(); }
+function searchBooks(){
+    let val=document.getElementById('search').value.toLowerCase();
+    document.querySelectorAll('.book-cover').forEach(cover=>{
+        let title=cover.querySelector('h3').innerText.toLowerCase();
+        cover.style.display=title.includes(val)?'flex':'none';
+    });
+}
+
+// لوحة الإدارة مع كلمة السر
+const vaultKey=document.querySelector('.secret-vault-key');
+const adminPanel=document.querySelector('.admin-panel');
+const closeIcon=document.querySelector('.close-icon');
+vaultKey.addEventListener('click',()=>{
+    const pass=prompt("أدخل كلمة السر للوصول للوحة الإدارة:");
+    if(pass==="6550/18042012") adminPanel.style.display="flex";
+    else alert("كلمة السر غير صحيحة!");
+});
+closeIcon.addEventListener('click',()=>{ adminPanel.style.display='none'; });
+
+function displayAdminBooks(){
+    const adminList=document.getElementById('adminBookList');
+    const data=JSON.parse(localStorage.getItem('myAdvancedLib'))||[];
+    adminList.innerHTML='';
+    data.forEach((item,index)=>{
+        const div=document.createElement('div');
+        div.className='admin-book';
+        div.innerHTML=`<span>${item.title}</span><button onclick="deleteBook(${index})">حذف</button>`;
+        adminList.appendChild(div);
+    });
+}
+
+function deleteBook(index){
+    const data=JSON.parse(localStorage.getItem('myAdvancedLib'))||[];
+    if(confirm("هل أنت متأكد من حذف هذه القصة؟")){
+        data.splice(index,1);
+        localStorage.setItem('myAdvancedLib',JSON.stringify(data));
+        displayBooks();
+    }
+}
+
+document.getElementById('storyFile').addEventListener('change', function(){
+    const file=this.files[0];
+    if(file) document.getElementById('filePreview').innerText='الملف المختار: '+file.name;
+    else document.getElementById('filePreview').innerText='';
+});
+
+function addStory(){
+    const title=document.getElementById('storyTitle').value.trim();
+    const desc=document.getElementById('storyDesc').value.trim();
+    const type=document.getElementById('storyType').value;
+    const fileInput=document.getElementById('storyFile');
+    if(!fileInput.files.length && (!title || !desc || !type)){
+        alert("يرجى ملء جميع الحقول أو تحميل ملف.");
+        return;
+    }
+    let readerPromise;
+    if(fileInput.files.length){
+        const file=fileInput.files[0];
+        readerPromise=new Promise((res,rej)=>{
+            const reader=new FileReader();
+            reader.onload=function(e){ res({data:e.target.result,name:file.name}); }
+            reader.onerror=function(){ rej("فشل قراءة الملف"); }
+            reader.readAsDataURL(file);
+        });
+    } else readerPromise=Promise.resolve({data:null,name:null});
+    readerPromise.then(fileData=>{
+        const data=JSON.parse(localStorage.getItem('myAdvancedLib'))||[];
+        data.push({
+            title:title||fileData.name,
+            desc:desc||"",
+            type:type||fileData.name.split('.').pop(),
+            file:fileData.data,
+            name:fileData.name,
+            date:new Date().toLocaleDateString()
+        });
+        localStorage.setItem('myAdvancedLib',JSON.stringify(data));
+        displayBooks();
+        document.getElementById('storyTitle').value="";
+        document.getElementById('storyDesc').value="";
+        document.getElementById('storyType').value="";
+        document.getElementById('storyFile').value="";
+        document.getElementById('filePreview').innerText="";
+        alert("تمت إضافة القصة بنجاح!");
+    });
+}
+
+window.onload=displayBooks;
+</script>
+</body>
+</html>
+
